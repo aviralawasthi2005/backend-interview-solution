@@ -1,44 +1,26 @@
-import { Router, Request, Response } from 'express';
-import { SyncService } from '../services/syncService';
-import { TaskService } from '../services/taskService';
-import { Database } from '../db/database';
+export class SyncService {
+  // ... existing code ...
 
-export function createSyncRouter(db: Database): Router {
-  const router = Router();
-  const taskService = new TaskService(db);
-  const syncService = new SyncService(db, taskService);
+  async getPendingSyncCount(): Promise<number> {
+    const sql = 'SELECT COUNT(*) as count FROM sync_queue WHERE retry_count < 3';
+    const result = await this.db.get<CountResult>(sql);
+    return result?.count || 0;
+  }
 
-  // Trigger manual sync
-  router.post('/sync', async (req: Request, res: Response) => {
-    // TODO: Implement sync endpoint
-    // 1. Check connectivity first
-    // 2. Call syncService.sync()
-    // 3. Return sync result
-    res.status(501).json({ error: 'Not implemented' });
-  });
+  async getFailedSyncCount(): Promise<number> {
+    const sql = 'SELECT COUNT(*) as count FROM sync_queue WHERE retry_count >= 3';
+    const result = await this.db.get<CountResult>(sql);
+    return result?.count || 0;
+  }
 
-  // Check sync status
-  router.get('/status', async (req: Request, res: Response) => {
-    // TODO: Implement sync status endpoint
-    // 1. Get pending sync count
-    // 2. Get last sync timestamp
-    // 3. Check connectivity
-    // 4. Return status summary
-    res.status(501).json({ error: 'Not implemented' });
-  });
-
-  // Batch sync endpoint (for server-side)
-  router.post('/batch', async (req: Request, res: Response) => {
-    // TODO: Implement batch sync endpoint
-    // This would be implemented on the server side
-    // to handle batch sync requests from clients
-    res.status(501).json({ error: 'Not implemented' });
-  });
-
-  // Health check endpoint
-  router.get('/health', async (req: Request, res: Response) => {
-    res.json({ status: 'ok', timestamp: new Date() });
-  });
-
-  return router;
+  async getLastSyncTime(): Promise<string | null> {
+    const sql = `
+      SELECT last_synced_at FROM tasks 
+      WHERE last_synced_at IS NOT NULL 
+      ORDER BY last_synced_at DESC 
+      LIMIT 1
+    `;
+    const result = await this.db.get<LastSyncResult>(sql);
+    return result?.last_synced_at || null;
+  }
 }

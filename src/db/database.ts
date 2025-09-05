@@ -1,6 +1,4 @@
-import sqlite3 from 'sqlite3';
-import { promisify } from 'util';
-import { Task, SyncQueueItem } from '../types';
+import * as sqlite3 from 'sqlite3';
 
 const sqlite = sqlite3.verbose();
 
@@ -49,27 +47,27 @@ export class Database {
   }
 
   // Helper methods
-  run(sql: string, params: any[] = []): Promise<void> {
+  run(sql: string, params: unknown[] = []): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.db.run(sql, params, (err) => {
+      this.db.run(sql, params, (err: Error | null) => {
         if (err) reject(err);
         else resolve();
       });
     });
   }
 
-  get(sql: string, params: any[] = []): Promise<any> {
+  get(sql: string, params: unknown[] = []): Promise<unknown> {
     return new Promise((resolve, reject) => {
-      this.db.get(sql, params, (err, row) => {
+      this.db.get(sql, params, (err: Error | null, row: unknown) => {
         if (err) reject(err);
         else resolve(row);
       });
     });
   }
 
-  all(sql: string, params: any[] = []): Promise<any[]> {
+  all(sql: string, params: unknown[] = []): Promise<unknown[]> {
     return new Promise((resolve, reject) => {
-      this.db.all(sql, params, (err, rows) => {
+      this.db.all(sql, params, (err: Error | null, rows: unknown[]) => {
         if (err) reject(err);
         else resolve(rows);
       });
@@ -78,7 +76,7 @@ export class Database {
 
   close(): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.db.close((err) => {
+      this.db.close((err: Error | null) => {
         if (err) reject(err);
         else resolve();
       });

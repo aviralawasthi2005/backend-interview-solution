@@ -5,6 +5,8 @@ import { Database } from './db/database';
 import { createTaskRouter } from './routes/tasks';
 import { createSyncRouter } from './routes/sync';
 import { errorHandler } from './middleware/errorHandler';
+import { TaskService } from './services/taskService';
+import { SyncService } from './services/syncService';
 
 dotenv.config();
 
@@ -18,9 +20,13 @@ app.use(express.json());
 // Initialize database
 const db = new Database(process.env.DATABASE_URL || './data/tasks.sqlite3');
 
-// Routes
-app.use('/api/tasks', createTaskRouter(db));
-app.use('/api', createSyncRouter(db));
+// Initialize services
+const syncService = new SyncService(db);
+const taskService = new TaskService(db, syncService);
+
+// Routes - pass the services to the routers
+app.use('/api/tasks', createTaskRouter(taskService));
+app.use('/api', createSyncRouter(syncService));
 
 // Error handling
 app.use(errorHandler);

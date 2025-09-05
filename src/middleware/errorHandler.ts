@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 
 export interface AppError extends Error {
   statusCode?: number;
@@ -7,8 +7,7 @@ export interface AppError extends Error {
 export function errorHandler(
   err: AppError,
   req: Request,
-  res: Response,
-  next: NextFunction
+  res: Response
 ): void {
   console.error('Error:', err);
 
@@ -19,5 +18,5 @@ export function errorHandler(
     error: message,
     timestamp: new Date().toISOString(),
     path: req.path,
-  });
+  }); 
 }
